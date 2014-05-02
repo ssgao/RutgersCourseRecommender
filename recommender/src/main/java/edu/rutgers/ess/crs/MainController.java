@@ -6,17 +6,21 @@ import org.apache.hadoop.util.ToolRunner;
 
 import edu.rutgers.ess.crs.formatcourse.FormatCourseDriver;
 import edu.rutgers.ess.crs.formatterm.FormatTermDriver;
-import edu.rutgers.ess.crs.termcoursejoin.TermCourseJoinDriver;
-import edu.rutgers.ess.crs.testingtrainingcross.TestingTrainingCrossDriver;
+import edu.rutgers.ess.crs.neighbor.NeighborDriver;
+import edu.rutgers.ess.crs.recommendation.RecommendationDriver;
+import edu.rutgers.ess.crs.split.SplitDriver;
 
 public class MainController {
 	
 	public static void main(final String[] args) throws Exception {
 		
-		run(new FormatCourseDriver(), args);
-		run(new FormatTermDriver(), args);
-		run(new TermCourseJoinDriver(), args);
-		run(new TestingTrainingCrossDriver(), args);
+		
+//		run(new FormatCourseDriver(), appendElement(args, "")); // course.csv
+//		run(new FormatTermDriver(), args); // term.csv
+//		run(new TermCourseJoinDriver(), args); // test/*.csv, training.csv
+//		run(new TestingTrainingCrossDriver(), args); // neighbor.csv, neighbor_ruid_only.csv 
+//		run(new FormatCourseDriver(), appendElement(args, "true")); // course2.csv
+		run(new RecommendationDriver(), args); // recommendation.csv
 		System.exit(0);
 	}
 	
@@ -26,5 +30,14 @@ public class MainController {
 		if (res != 0) {
 			System.exit(res);
 		}
+	}
+	
+	private static String[] appendElement(String[] args, String element) {
+		String[] result = new String[args.length + 1];
+		for (int i = 0; i < args.length; i++) {
+			result[i] = args[i];
+		}
+		result[args.length] = element;
+		return result;
 	}
 }

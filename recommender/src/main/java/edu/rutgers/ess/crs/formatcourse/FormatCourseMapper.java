@@ -1,13 +1,24 @@
 package edu.rutgers.ess.crs.formatcourse;
 
 import java.io.IOException;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.Text;
-import edu.rutgers.ess.crs.utility.TextArrayWritable;
+
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import edu.rutgers.ess.crs.utility.TextArrayWritable;
+
 public class FormatCourseMapper extends Mapper<LongWritable, TextArrayWritable, Text, Text> {
+	
+	private static boolean ytg;
+	public static String INCLUDE_YEAR_TERM_GRADE = "formatcoursemapper.include.yeartermgrade";
+	
+	protected void setup(Context context) throws IOException {
+		
+		ytg = context.getConfiguration().getBoolean(INCLUDE_YEAR_TERM_GRADE, false);
+	}
+	
 	protected void map(final LongWritable key, final TextArrayWritable value, Context context) throws IOException,
 			InterruptedException {
 
@@ -17,7 +28,10 @@ public class FormatCourseMapper extends Mapper<LongWritable, TextArrayWritable, 
 		final String subj = ((Text) vals[4]).toString();
 		final String courseNo = ((Text) vals[5]).toString();
 		final String courseType = ((Text) vals[13]).toString();
-
+		final String yearterm = ((Text) vals[0]).toString() + ((Text) vals[1]).toString();
+		final String grade = ((Text) vals[17]).toString();
+		final String title = ((Text) vals[12]).toString().replace(',', ' ');
+		
 		if (courseType == null) {
 			return;
 		}
@@ -28,7 +42,12 @@ public class FormatCourseMapper extends Mapper<LongWritable, TextArrayWritable, 
 				&& courseNo.charAt(0) != ' ') {
 
 			final Text outputKey = (Text) vals[36];
-			final Text outputValue = new Text(offeringUnit + ":" + subj + ":" + courseNo);
+			final Text outputValue;
+			if (ytg) {
+				outputValue = new Text(yearterm + "###" + offeringUnit + ":" + subj + ":" + courseNo + "###" + grade + "###" + title);
+			} else {
+				outputValue = new Text(offeringUnit + ":" + subj + ":" + courseNo);
+			}
 			context.write(outputKey, outputValue);
 		}
 	}

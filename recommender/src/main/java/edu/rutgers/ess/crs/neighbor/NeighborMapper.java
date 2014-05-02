@@ -1,4 +1,4 @@
-package edu.rutgers.ess.crs.testingtrainingcross;
+package edu.rutgers.ess.crs.neighbor;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -17,13 +17,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import edu.rutgers.ess.crs.utility.KeyValueCSVInputFormat;
 
-public class TestingTrainingCrossMapper extends Mapper<Text, Text, Text, Text> {
-	private List<String[]> testingList;
-
-	public TestingTrainingCrossMapper() {
-		super();
-		this.testingList = new LinkedList<String[]>();
-	}
+public class NeighborMapper extends Mapper<Text, Text, Text, Text> {
+	
+	private List<String[]> testingList = new LinkedList<String[]>();
 
 	protected void setup(Context context) throws IOException {
 		final Configuration conf = context.getConfiguration();
@@ -143,16 +139,16 @@ public class TestingTrainingCrossMapper extends Mapper<Text, Text, Text, Text> {
 
 			rating += (common.size() - 5) / 40.0 * 0.55;
 
-			common.set(0, new Text(String.valueOf(rating))); // update rating
+			common.set(0, new Text(String.format("%.3f", rating))); // update rating
 			common.set(4, new Text(String.valueOf(common.size() - 5))); // updating # of courses in common
-			
+
 			if (rating <= 0.0) { // ignore ratings that are 0
 				continue;
 			}
-			
+
 			final Text outputKey = new Text(testingRecord[0]);
 			final Text outputValue = new Text(StringUtils.join(common, ','));
-			
+
 			context.write(outputKey, outputValue);
 		}
 	}
